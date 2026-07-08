@@ -1,0 +1,4 @@
+interface:
+  display_name: "Audio Meeting Minutes"
+  short_description: "Cautious audio transcripts and meeting summaries"
+  default_prompt: "Use $audio-meeting-minutes to transcribe this audio, use true diarization only when available, otherwise mark speakers UNKNOWN or low-confidence, and summarize the meeting."
