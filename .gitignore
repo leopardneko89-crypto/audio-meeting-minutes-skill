@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.pytest_cache/
+.venv/
+work/
+outputs/
+*.m4a
+*.mp3
+*.wav
+*.mp4
+*.mov
+*.json.tmp
+*.md.tmp
