@@ -12,7 +12,7 @@ class PluginPackageTests(unittest.TestCase):
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 
         self.assertEqual(manifest["name"], "audio-meeting-minutes")
-        self.assertEqual(manifest["version"], "1.0.0")
+        self.assertEqual(manifest["version"], "1.0.1")
         self.assertEqual(manifest["skills"], "./skills/")
         self.assertEqual(
             manifest["repository"],
@@ -20,6 +20,15 @@ class PluginPackageTests(unittest.TestCase):
         )
         self.assertTrue((ROOT / "skills" / "audio-meeting-minutes" / "SKILL.md").is_file())
         self.assertFalse((ROOT / "audio-meeting-minutes").exists())
+
+    def test_manifest_interface_declares_the_repository_website(self) -> None:
+        manifest_path = ROOT / ".codex-plugin" / "plugin.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(
+            manifest["interface"]["websiteURL"],
+            "https://github.com/leopardneko89-crypto/audio-meeting-minutes-skill",
+        )
 
     def test_workflow_runs_official_plugin_validation(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "test.yml").read_text(
