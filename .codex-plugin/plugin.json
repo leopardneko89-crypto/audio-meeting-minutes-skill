@@ -1,0 +1,33 @@
+{
+  "name": "audio-meeting-minutes",
+  "version": "1.0.0",
+  "description": "Privacy-aware meeting transcription and evidence-grounded minutes from audio or video recordings.",
+  "repository": "https://github.com/leopardneko89-crypto/audio-meeting-minutes-skill",
+  "homepage": "https://github.com/leopardneko89-crypto/audio-meeting-minutes-skill",
+  "skills": "./skills/",
+  "author": {
+    "name": "leopardneko89-crypto",
+    "url": "https://github.com/leopardneko89-crypto"
+  },
+  "keywords": [
+    "audio",
+    "transcription",
+    "meeting-minutes",
+    "diarization"
+  ],
+  "interface": {
+    "displayName": "Audio Meeting Minutes",
+    "shortDescription": "Cautious transcripts and grounded meeting minutes",
+    "longDescription": "Transcribe meeting audio or video, label turns without overstating speaker identity, and produce timestamp-grounded summaries, Q&A, actions, and uncertainty records.",
+    "developerName": "leopardneko89-crypto",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use $audio-meeting-minutes to transcribe this recording, cautiously label speakers, and prepare evidence-grounded minutes."
+    ]
+  }
+}

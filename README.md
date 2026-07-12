@@ -19,13 +19,18 @@ Codex skill for turning meeting audio/video recordings into cautious speaker-lab
 
 ## Install
 
+The repository is both a standalone Agent Skill and a Codex plugin package. Its
+`.codex-plugin/plugin.json` exposes `skills/audio-meeting-minutes/` without duplicating the skill.
+A SHA-pinned Codex marketplace can therefore install the repository as a plugin, while the
+portable copy workflow below remains available for other Agent Skills clients.
+
 Clone this repository and copy the skill folder into the current personal skills directory.
 On POSIX shells:
 
 ```bash
 git clone https://github.com/leopardneko89-crypto/audio-meeting-minutes-skill.git
 SKILLS_ROOT="$HOME/.agents/skills"
-SKILL_SOURCE="audio-meeting-minutes-skill/audio-meeting-minutes"
+SKILL_SOURCE="audio-meeting-minutes-skill/skills/audio-meeting-minutes"
 SKILL_DEST="$SKILLS_ROOT/audio-meeting-minutes"
 mkdir -p "$SKILL_DEST"
 cp -R "$SKILL_SOURCE/." "$SKILL_DEST/"
@@ -36,14 +41,14 @@ On PowerShell:
 ```powershell
 git clone https://github.com/leopardneko89-crypto/audio-meeting-minutes-skill.git
 $SkillsRoot = Join-Path $HOME ".agents\skills"
-$SkillSource = Join-Path (Get-Location) "audio-meeting-minutes-skill\audio-meeting-minutes"
+$SkillSource = Join-Path (Get-Location) "audio-meeting-minutes-skill\skills\audio-meeting-minutes"
 $SkillDest = Join-Path $SkillsRoot "audio-meeting-minutes"
 New-Item -ItemType Directory -Force -Path $SkillDest | Out-Null
 Get-ChildItem -LiteralPath $SkillSource -Force |
   Copy-Item -Destination $SkillDest -Recurse -Force
 ```
 
-The repository CI runs the pinned official Codex skill validator. For a local smoke check,
+The repository CI runs the pinned official Codex skill and plugin validators. For a local smoke check,
 resolve the installed script from `$HOME/.agents/skills/audio-meeting-minutes` (or the
 PowerShell equivalent shown above) and run it with `--self-test`.
 
@@ -121,11 +126,13 @@ The script records source filename and hash prefix, not full local paths, in sha
 
 ```text
 audio-meeting-minutes-skill/
-├── audio-meeting-minutes/        # Skill folder to copy into $HOME/.agents/skills
-│   ├── SKILL.md
-│   ├── agents/openai.yaml
-│   ├── references/output_contract.md
-│   └── scripts/transcribe_meeting_audio.py
+├── .codex-plugin/plugin.json
+├── skills/
+│   └── audio-meeting-minutes/    # Skill folder to copy into $HOME/.agents/skills
+│       ├── SKILL.md
+│       ├── agents/openai.yaml
+│       ├── references/output_contract.md
+│       └── scripts/transcribe_meeting_audio.py
 ├── tests/test_audio_meeting_utils.py
 ├── docs/review-synthesis.md
 └── README.md
@@ -137,7 +144,8 @@ The tests cover speaker assignment, confidence propagation, heuristic label safe
 
 ```bash
 python tests/test_audio_meeting_utils.py
-python audio-meeting-minutes/scripts/transcribe_meeting_audio.py --self-test
+python -m unittest discover -s tests -p "test_package.py" -v
+python skills/audio-meeting-minutes/scripts/transcribe_meeting_audio.py --self-test
 ```
 
 ## Privacy Notes

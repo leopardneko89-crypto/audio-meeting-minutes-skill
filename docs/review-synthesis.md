@@ -3,7 +3,7 @@
 ## 리뷰 운영
 
 - 방식: 5개 독립 비판 에이전트 병렬 리뷰
-- 대상: `audio-meeting-minutes/`
+- 대상: `skills/audio-meeting-minutes/`
 - 원칙: 각 에이전트가 전체 스킬 폴더를 모두 검토하되, 관점만 다르게 부여
 
 ## 에이전트 관점
@@ -51,17 +51,17 @@
 
 ## 수정된 파일
 
-- `audio-meeting-minutes/SKILL.md`
-- `audio-meeting-minutes/scripts/transcribe_meeting_audio.py`
-- `audio-meeting-minutes/references/output_contract.md`
-- `audio-meeting-minutes/agents/openai.yaml`
+- `skills/audio-meeting-minutes/SKILL.md`
+- `skills/audio-meeting-minutes/scripts/transcribe_meeting_audio.py`
+- `skills/audio-meeting-minutes/references/output_contract.md`
+- `skills/audio-meeting-minutes/agents/openai.yaml`
 - `tests/test_audio_meeting_utils.py`
 
 ## 검증
 
 - `python tests/test_audio_meeting_utils.py` → PASS
-- `python audio-meeting-minutes/scripts/transcribe_meeting_audio.py --self-test` → PASS
-- `python "$VALIDATOR" audio-meeting-minutes` → `Skill is valid!`
+- `python skills/audio-meeting-minutes/scripts/transcribe_meeting_audio.py --self-test` → PASS
+- `python "$VALIDATOR" skills/audio-meeting-minutes` → `Skill is valid!`
 - 실제 4분 음성 smoke run → transcript JSON, speaker transcript, meeting minutes template 생성 확인
 - smoke run 확인: 원본 미디어 기본 미보존, Markdown 전체 로컬 경로 미노출
 
