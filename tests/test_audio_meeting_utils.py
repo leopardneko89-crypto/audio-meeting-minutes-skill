@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -83,6 +84,29 @@ def test_heuristic_requires_positive_speaker_count_and_uses_turn_labels():
     assert labeled[0]["speaker"] == "TURN_01"
     assert labeled[1]["speaker"] == "TURN_02"
     assert labeled[0]["speaker_confidence"] == "heuristic-low"
+
+
+def test_missing_faster_whisper_guidance_uses_cross_platform_python_launcher():
+    module = load_module()
+
+    with mock.patch.dict(sys.modules, {"faster_whisper": None}):
+        try:
+            module.transcribe_with_faster_whisper(
+                Path("unused.m4a"),
+                language=None,
+                model_name="tiny",
+                device="cpu",
+                compute_type="int8",
+                initial_prompt=None,
+                vad_min_silence_ms=350,
+            )
+        except RuntimeError as exc:
+            message = str(exc)
+        else:
+            raise AssertionError("expected missing faster-whisper RuntimeError")
+
+    assert "python -m pip install faster-whisper" in message
+    assert "python3" not in message
 
 
 def test_source_identifier_redacts_full_path_and_markdown_cell_is_safe():
@@ -237,6 +261,7 @@ if __name__ == "__main__":
         test_assign_speakers_aggregates_overlap_by_speaker_and_rejects_weak_coverage,
         test_group_turns_preserves_lowest_confidence_and_splits_long_turns,
         test_heuristic_requires_positive_speaker_count_and_uses_turn_labels,
+        test_missing_faster_whisper_guidance_uses_cross_platform_python_launcher,
         test_source_identifier_redacts_full_path_and_markdown_cell_is_safe,
         test_source_identifier_uses_portable_basename_for_windows_paths,
         test_tracked_instruction_files_have_no_machine_specific_or_legacy_skill_paths,

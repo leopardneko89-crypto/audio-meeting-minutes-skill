@@ -250,7 +250,7 @@ def transcribe_with_faster_whisper(
     except ImportError as exc:
         raise RuntimeError(
             "Missing dependency: faster-whisper. Install it in the active Python "
-            "environment with: python3 -m pip install faster-whisper"
+            "environment with: python -m pip install faster-whisper"
         ) from exc
 
     model = WhisperModel(model_name, device=device, compute_type=compute_type)
