@@ -9,7 +9,8 @@ from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "audio-meeting-minutes" / "scripts" / "transcribe_meeting_audio.py"
+SKILL = ROOT / "skills" / "audio-meeting-minutes"
+SCRIPT = SKILL / "scripts" / "transcribe_meeting_audio.py"
 WORKFLOW = ROOT / ".github" / "workflows" / "test.yml"
 
 
@@ -193,7 +194,7 @@ def test_instruction_commands_use_cross_platform_python_launcher():
     instructions = "\n".join(
         [
             (ROOT / "README.md").read_text(encoding="utf-8"),
-            (ROOT / "audio-meeting-minutes" / "SKILL.md").read_text(encoding="utf-8"),
+            (SKILL / "SKILL.md").read_text(encoding="utf-8"),
         ]
     )
 
@@ -202,7 +203,7 @@ def test_instruction_commands_use_cross_platform_python_launcher():
 
 def test_agent_default_prompt_preserves_explicit_skill_invocation():
     agent_config = (
-        ROOT / "audio-meeting-minutes" / "agents" / "openai.yaml"
+        SKILL / "agents" / "openai.yaml"
     ).read_text(encoding="utf-8")
 
     assert "$audio-meeting-minutes" in agent_config
@@ -212,7 +213,7 @@ def test_self_test_runs_from_checkout_path_with_spaces_and_korean_text():
     with tempfile.TemporaryDirectory() as temp_dir:
         checkout = Path(temp_dir) / "checkout with spaces" / "한글 경로"
         copied_skill = checkout / "audio-meeting-minutes"
-        shutil.copytree(ROOT / "audio-meeting-minutes", copied_skill)
+        shutil.copytree(SKILL, copied_skill)
         skill_text = (copied_skill / "SKILL.md").read_text(encoding="utf-8")
         relative_contract = Path("references") / "output_contract.md"
 
@@ -240,8 +241,11 @@ def test_ci_runs_pinned_cross_platform_validation_without_credentials():
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
     assert "permissions:\n  contents: read" in workflow
-    assert "ubuntu-latest" in workflow
-    assert "windows-latest" in workflow
+    assert "ubuntu-24.04" in workflow
+    assert "windows-2025" in workflow
+    assert 'python-version: "3.12.10"' in workflow
+    assert "ubuntu-latest" not in workflow
+    assert "windows-latest" not in workflow
     assert "timeout-minutes:" in workflow
     assert "PYTHONUTF8:" in workflow
     assert "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0" in workflow
@@ -249,6 +253,7 @@ def test_ci_runs_pinned_cross_platform_validation_without_credentials():
     assert "9e552e9d15ba52bed7077d5357f3e18e330f8f38" in workflow
     assert "6cc9dc3199c935916cf6f73fcbbbb0e3bb1b58c8f5109fefa499978908164f51" in workflow
     assert "quick_validate.py" in workflow
+    assert "validate_plugin.py" in workflow
     assert "PyYAML==6.0.3" in workflow
     assert "tests/test_audio_meeting_utils.py" in workflow
     assert "--self-test" in workflow
