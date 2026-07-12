@@ -170,9 +170,14 @@ def file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def source_identifier(path: Path, sha256_value: str) -> dict[str, Any]:
+def portable_basename(path: os.PathLike[str] | str) -> str:
+    """Return a filename without trusting the current platform's separator."""
+    return re.split(r"[\\/]", os.fspath(path).rstrip("\\/"))[-1]
+
+
+def source_identifier(path: os.PathLike[str] | str, sha256_value: str) -> dict[str, Any]:
     return {
-        "filename": path.name,
+        "filename": portable_basename(path),
         "sha256_prefix": sha256_value[:12],
     }
 
