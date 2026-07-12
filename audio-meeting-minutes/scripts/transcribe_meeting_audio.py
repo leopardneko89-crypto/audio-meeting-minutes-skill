@@ -170,9 +170,14 @@ def file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def source_identifier(path: Path, sha256_value: str) -> dict[str, Any]:
+def portable_basename(path: os.PathLike[str] | str) -> str:
+    """Return a filename without trusting the current platform's separator."""
+    return re.split(r"[\\/]", os.fspath(path).rstrip("\\/"))[-1]
+
+
+def source_identifier(path: os.PathLike[str] | str, sha256_value: str) -> dict[str, Any]:
     return {
-        "filename": path.name,
+        "filename": portable_basename(path),
         "sha256_prefix": sha256_value[:12],
     }
 
@@ -245,7 +250,7 @@ def transcribe_with_faster_whisper(
     except ImportError as exc:
         raise RuntimeError(
             "Missing dependency: faster-whisper. Install it in the active Python "
-            "environment with: python3 -m pip install faster-whisper"
+            "environment with: python -m pip install faster-whisper"
         ) from exc
 
     model = WhisperModel(model_name, device=device, compute_type=compute_type)

@@ -19,19 +19,33 @@ Codex skill for turning meeting audio/video recordings into cautious speaker-lab
 
 ## Install
 
-Clone this repository and copy the skill folder into your Codex skills directory:
+Clone this repository and copy the skill folder into the current personal skills directory.
+On POSIX shells:
 
 ```bash
 git clone https://github.com/leopardneko89-crypto/audio-meeting-minutes-skill.git
-mkdir -p ~/.codex/skills
-cp -R audio-meeting-minutes-skill/audio-meeting-minutes ~/.codex/skills/
+SKILLS_ROOT="$HOME/.agents/skills"
+SKILL_SOURCE="audio-meeting-minutes-skill/audio-meeting-minutes"
+SKILL_DEST="$SKILLS_ROOT/audio-meeting-minutes"
+mkdir -p "$SKILL_DEST"
+cp -R "$SKILL_SOURCE/." "$SKILL_DEST/"
 ```
 
-Validate the skill:
+On PowerShell:
 
-```bash
-python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ~/.codex/skills/audio-meeting-minutes
+```powershell
+git clone https://github.com/leopardneko89-crypto/audio-meeting-minutes-skill.git
+$SkillsRoot = Join-Path $HOME ".agents\skills"
+$SkillSource = Join-Path (Get-Location) "audio-meeting-minutes-skill\audio-meeting-minutes"
+$SkillDest = Join-Path $SkillsRoot "audio-meeting-minutes"
+New-Item -ItemType Directory -Force -Path $SkillDest | Out-Null
+Get-ChildItem -LiteralPath $SkillSource -Force |
+  Copy-Item -Destination $SkillDest -Recurse -Force
 ```
+
+The repository CI runs the pinned official Codex skill validator. For a local smoke check,
+resolve the installed script from `$HOME/.agents/skills/audio-meeting-minutes` (or the
+PowerShell equivalent shown above) and run it with `--self-test`.
 
 ## Basic Use
 
@@ -49,20 +63,22 @@ Use $audio-meeting-minutes to transcribe this Korean review recording and summar
 
 ## Optional Local Transcription Setup
 
-The skill includes a helper script:
+The skill includes a helper script. Quote the resolved skill path so spaces and non-ASCII
+characters in the home or checkout path remain intact:
 
 ```bash
-python3 ~/.codex/skills/audio-meeting-minutes/scripts/transcribe_meeting_audio.py /path/to/recording.m4a
+SKILL_ROOT="$HOME/.agents/skills/audio-meeting-minutes"
+python "$SKILL_ROOT/scripts/transcribe_meeting_audio.py" "/path/to/recording.m4a"
 ```
 
 For local Whisper transcription:
 
 ```bash
-python3 -m venv work/audio-meeting-venv
-work/audio-meeting-venv/bin/python -m pip install --upgrade pip wheel
-work/audio-meeting-venv/bin/python -m pip install faster-whisper
-work/audio-meeting-venv/bin/python ~/.codex/skills/audio-meeting-minutes/scripts/transcribe_meeting_audio.py \
-  /path/to/recording.m4a \
+python -m venv work/audio-meeting-venv
+# Activate the venv with your shell's standard command, then:
+python -m pip install --upgrade pip wheel
+python -m pip install faster-whisper
+python "$SKILL_ROOT/scripts/transcribe_meeting_audio.py" "/path/to/recording.m4a" \
   --language auto \
   --speaker-mode auto
 ```
@@ -70,8 +86,7 @@ work/audio-meeting-venv/bin/python ~/.codex/skills/audio-meeting-minutes/scripts
 For Korean audio with domain terms:
 
 ```bash
-work/audio-meeting-venv/bin/python ~/.codex/skills/audio-meeting-minutes/scripts/transcribe_meeting_audio.py \
-  /path/to/recording.m4a \
+python "$SKILL_ROOT/scripts/transcribe_meeting_audio.py" "/path/to/recording.m4a" \
   --language ko \
   --initial-prompt "철도 연구과제 심사, 레일, 분진, 매니퓰레이터, 트랙마스터"
 ```
@@ -80,12 +95,12 @@ work/audio-meeting-venv/bin/python ~/.codex/skills/audio-meeting-minutes/scripts
 
 True acoustic speaker diarization requires `pyannote.audio`, a Hugging Face token, and model access.
 
-Use an environment variable rather than passing tokens on the command line:
+Set `HF_TOKEN` through your shell or secret manager rather than passing tokens on the
+command line, then run:
 
 ```bash
-work/audio-meeting-venv/bin/python -m pip install pyannote.audio
-HF_TOKEN=... work/audio-meeting-venv/bin/python ~/.codex/skills/audio-meeting-minutes/scripts/transcribe_meeting_audio.py \
-  /path/to/recording.m4a \
+python -m pip install pyannote.audio
+python "$SKILL_ROOT/scripts/transcribe_meeting_audio.py" "/path/to/recording.m4a" \
   --speaker-mode pyannote \
   --speakers 3
 ```
@@ -106,7 +121,7 @@ The script records source filename and hash prefix, not full local paths, in sha
 
 ```text
 audio-meeting-minutes-skill/
-├── audio-meeting-minutes/        # Codex skill folder to copy into ~/.codex/skills
+├── audio-meeting-minutes/        # Skill folder to copy into $HOME/.agents/skills
 │   ├── SKILL.md
 │   ├── agents/openai.yaml
 │   ├── references/output_contract.md
@@ -121,8 +136,8 @@ audio-meeting-minutes-skill/
 The tests cover speaker assignment, confidence propagation, heuristic label safety, path redaction, and Markdown escaping. They do not download transcription models.
 
 ```bash
-python3 tests/test_audio_meeting_utils.py
-python3 audio-meeting-minutes/scripts/transcribe_meeting_audio.py --self-test
+python tests/test_audio_meeting_utils.py
+python audio-meeting-minutes/scripts/transcribe_meeting_audio.py --self-test
 ```
 
 ## Privacy Notes

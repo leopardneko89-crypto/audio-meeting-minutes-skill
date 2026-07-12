@@ -21,11 +21,13 @@ Turn the recording into two deliverables: a transcript with cautious speaker/tur
 
 ## Script Usage
 
-Use the bundled script from this skill directory:
+Resolve the directory containing this `SKILL.md`, then resolve the script and reference
+files relative to that directory. Do not assume a home directory or checkout location.
+Pass every resolved path as one quoted argument so spaces and non-ASCII characters remain
+intact:
 
 ```bash
-python3 /Users/jay/.codex/skills/audio-meeting-minutes/scripts/transcribe_meeting_audio.py \
-  /path/to/recording.m4a \
+python "<skill-root>/scripts/transcribe_meeting_audio.py" "/path/to/recording.m4a" \
   --out-dir work/audio-meeting-minutes \
   --language auto \
   --model medium \
@@ -35,10 +37,11 @@ python3 /Users/jay/.codex/skills/audio-meeting-minutes/scripts/transcribe_meetin
 If `faster-whisper` is missing, install it in an isolated workspace venv:
 
 ```bash
-python3 -m venv work/audio-meeting-venv
-work/audio-meeting-venv/bin/python -m pip install --upgrade pip wheel
-work/audio-meeting-venv/bin/python -m pip install faster-whisper
-work/audio-meeting-venv/bin/python /Users/jay/.codex/skills/audio-meeting-minutes/scripts/transcribe_meeting_audio.py /path/to/recording.m4a
+python -m venv work/audio-meeting-venv
+# Activate the venv with the current shell's standard command, then:
+python -m pip install --upgrade pip wheel
+python -m pip install faster-whisper
+python "<skill-root>/scripts/transcribe_meeting_audio.py" "/path/to/recording.m4a"
 ```
 
 For Korean meetings, pass `--language ko` and optionally `--initial-prompt "철도 연구과제 심사, 레일, 분진, 매니퓰레이터"` when domain terms matter.
@@ -46,9 +49,9 @@ For Korean meetings, pass `--language ko` and optionally `--initial-prompt "철�
 For true diarization, use `pyannote.audio` only when the environment has a Hugging Face token and model access. Prefer environment variables over `--hf-token` because command-line tokens can leak via shell history or process listings:
 
 ```bash
-work/audio-meeting-venv/bin/python -m pip install pyannote.audio
-HF_TOKEN=... work/audio-meeting-venv/bin/python /Users/jay/.codex/skills/audio-meeting-minutes/scripts/transcribe_meeting_audio.py \
-  /path/to/recording.m4a --speaker-mode pyannote --speakers 3
+python -m pip install pyannote.audio
+python "<skill-root>/scripts/transcribe_meeting_audio.py" "/path/to/recording.m4a" \
+  --speaker-mode pyannote --speakers 3
 ```
 
 The script creates a unique run directory and writes `speaker_transcript.md`, `transcript_segments.json`, and `meeting_minutes_template.md`. If true diarization is not available, do not block the task. Produce a transcript with `UNKNOWN` speakers or explicitly low-confidence `TURN_XX` labels, then infer roles only with timestamped text evidence.

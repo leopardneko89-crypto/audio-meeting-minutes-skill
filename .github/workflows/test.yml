@@ -4,15 +4,47 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    env:
+      PYTHONUTF8: "1"
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # v7.0.0 tag commit (Node 24 runtime), verified 2026-07-12.
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      # v6.3.0 tag commit (Node 24 runtime), verified 2026-07-12.
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
-          python-version: "3.11"
+          python-version: "3.12"
+
+      - name: Install validator dependency
+        run: python -m pip install --disable-pip-version-check PyYAML==6.0.3
+
+      - name: Download pinned official skill validator
+        env:
+          VALIDATOR_URL: https://raw.githubusercontent.com/openai/codex/9e552e9d15ba52bed7077d5357f3e18e330f8f38/codex-rs/skills/src/assets/samples/skill-creator/scripts/quick_validate.py
+          VALIDATOR_SHA256: 6cc9dc3199c935916cf6f73fcbbbb0e3bb1b58c8f5109fefa499978908164f51
+          VALIDATOR_PATH: ${{ runner.temp }}/quick_validate.py
+        run: >-
+          python -c "import hashlib, os, pathlib, urllib.request; data = urllib.request.urlopen(os.environ['VALIDATOR_URL'], timeout=30).read(); actual = hashlib.sha256(data).hexdigest(); assert actual == os.environ['VALIDATOR_SHA256'], f'validator SHA-256 mismatch: {actual}'; pathlib.Path(os.environ['VALIDATOR_PATH']).write_bytes(data)"
+
+      - name: Run official skill validator
+        run: python "${{ runner.temp }}/quick_validate.py" audio-meeting-minutes
+
       - name: Run stdlib tests
         run: |
-          python3 tests/test_audio_meeting_utils.py
-          python3 audio-meeting-minutes/scripts/transcribe_meeting_audio.py --self-test
+          python tests/test_audio_meeting_utils.py
+          python audio-meeting-minutes/scripts/transcribe_meeting_audio.py --self-test
+
+      - name: Verify tracked files are unchanged
+        run: git diff --exit-code
